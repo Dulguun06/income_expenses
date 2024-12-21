@@ -1,8 +1,11 @@
+import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter_credit_card/flutter_credit_card.dart';
-import 'package:income_expenses/screens/app_colors.dart';
-
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:income_expenses/screens/Home.dart';
+import 'package:income_expenses/screens/user_provider.dart';
+import 'package:provider/provider.dart'; // Add Firestore dependency
 
 void main() => runApp(const Payment());
 
@@ -14,7 +17,7 @@ class Payment extends StatefulWidget {
 }
 
 class PaymentState extends State<Payment> {
-  bool isLightTheme = false;
+  bool isLightTheme = true;
   String cardNumber = '';
   String expiryDate = '';
   String cardHolderName = '';
@@ -23,6 +26,8 @@ class PaymentState extends State<Payment> {
   bool useGlassMorphism = false;
   bool useBackgroundImage = false;
   bool useFloatingAnimation = true;
+  final TextEditingController _chargeAmountController =
+      TextEditingController(); // Charge Amount Controller
   final OutlineInputBorder border = OutlineInputBorder(
     borderSide: BorderSide(
       color: Colors.grey.withOpacity(0.7),
@@ -33,26 +38,24 @@ class PaymentState extends State<Payment> {
 
   @override
   Widget build(BuildContext context) {
+    final userProvider = Provider.of<UserProvider>(context);
     SystemChrome.setSystemUIOverlayStyle(
       isLightTheme ? SystemUiOverlayStyle.dark : SystemUiOverlayStyle.light,
     );
     return MaterialApp(
-      title: 'Flutter Credit Card View Demo',
+      title: 'Credit Card',
       debugShowCheckedModeBanner: false,
       themeMode: isLightTheme ? ThemeMode.light : ThemeMode.dark,
       theme: ThemeData(
         textTheme: const TextTheme(
-          // Text style for text fields' input.
           titleMedium: TextStyle(color: Colors.black, fontSize: 18),
         ),
         colorScheme: ColorScheme.fromSeed(
           brightness: Brightness.light,
           seedColor: Colors.white,
           background: Colors.black,
-          // Defines colors like cursor color of the text fields.
           primary: Colors.black,
         ),
-        // Decoration theme for the text fields.
         inputDecorationTheme: InputDecorationTheme(
           hintStyle: const TextStyle(color: Colors.black),
           labelStyle: const TextStyle(color: Colors.black),
@@ -62,17 +65,14 @@ class PaymentState extends State<Payment> {
       ),
       darkTheme: ThemeData(
         textTheme: const TextTheme(
-          // Text style for text fields' input.
           titleMedium: TextStyle(color: Colors.white, fontSize: 18),
         ),
         colorScheme: ColorScheme.fromSeed(
           brightness: Brightness.dark,
           seedColor: Colors.black,
           background: Colors.white,
-          // Defines colors like cursor color of the text fields.
           primary: Colors.white,
         ),
-        // Decoration theme for the text fields.
         inputDecorationTheme: InputDecorationTheme(
           hintStyle: const TextStyle(color: Colors.white),
           labelStyle: const TextStyle(color: Colors.white),
@@ -81,237 +81,245 @@ class PaymentState extends State<Payment> {
         ),
       ),
       home: Scaffold(
-        appBar: AppBar(
-          title: Text('Түрийвч цэнэглэх'),
-          centerTitle: true,
-          leading: IconButton(
-            color: Colors.green,
-            icon: Icon(Icons.arrow_back, color: Colors.green),
-            onPressed: () => Navigator.of(context).pop(),
-          ),
-        ),
         resizeToAvoidBottomInset: false,
-        body: Builder(
-          builder: (BuildContext context) {
-            return Container(
-              decoration: BoxDecoration(
-                image: DecorationImage(
-                  image: ExactAssetImage(
-                    isLightTheme ? 'images/bg-light.png' : 'images/bg-dark.png',
-                  ),
-                  fit: BoxFit.fill,
-                ),
+        body: Stack(
+          children: [
+            Positioned(
+              width: MediaQuery.of(context).size.width,
+              top: 0,
+              child: Image.asset(
+                'images/hangingBackground.png',
+                fit: BoxFit.cover,
               ),
-              child: SafeArea(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.end,
-                  children: <Widget>[
+            ),
+            Positioned(
+              top: 0,
+              child: Image.asset(
+                'images/Group 6.png',
+                fit: BoxFit.cover,
+              ),
+            ),
+            Column(
+              children: [
+                const SizedBox(height: 40),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceAround,
+                  crossAxisAlignment: CrossAxisAlignment.center,
+                  children: [
                     IconButton(
-                      onPressed: () => setState(() {
-                        isLightTheme = !isLightTheme;
-                      }),
-                      icon: Icon(
-                        isLightTheme ? Icons.light_mode : Icons.dark_mode,
-                      ),
+                      color: Colors.white,
+                      icon: const Icon(Icons.arrow_back, color: Colors.white),
+                      onPressed: () => Navigator.of(context).pop(),
                     ),
-                    CreditCardWidget(
-                      enableFloatingCard: useFloatingAnimation,
-                      glassmorphismConfig: _getGlassmorphismConfig(),
-                      cardNumber: cardNumber,
-                      expiryDate: expiryDate,
-                      cardHolderName: cardHolderName,
-                      cvvCode: cvvCode,
-                      bankName: 'Khan Bank',
-                      frontCardBorder: useGlassMorphism
-                          ? null
-                          : Border.all(color: Colors.grey),
-                      backCardBorder: useGlassMorphism
-                          ? null
-                          : Border.all(color: Colors.grey),
-                      showBackView: isCvvFocused,
-                      obscureCardNumber: true,
-                      obscureCardCvv: true,
-                      isHolderNameVisible: true,
-                      cardBgColor: isLightTheme
-                          ? AppColors.cardBgLightColor
-                          : AppColors.cardBgColor,
-                      backgroundImage:
-                          useBackgroundImage ? 'images/card_bg.png' : null,
-                      isSwipeGestureEnabled: true,
-                      onCreditCardWidgetChange:
-                          (CreditCardBrand creditCardBrand) {},
-                      customCardTypeIcons: <CustomCardTypeIcon>[
-                        CustomCardTypeIcon(
-                          cardType: CardType.mastercard,
-                          cardImage: Image.asset(
-                            'images/mastercard.png',
-                            height: 48,
-                            width: 48,
-                          ),
-                        ),
-                      ],
+                    const Text(
+                      'Түрийвч цэнэглэх',
+                      style: TextStyle(color: Colors.white),
                     ),
-                    Expanded(
-                      child: SingleChildScrollView(
-                        child: Column(
-                          children: <Widget>[
-                            CreditCardForm(
-                              formKey: formKey,
-                              obscureCvv: true,
-                              obscureNumber: true,
-                              cardNumber: cardNumber,
-                              cvvCode: cvvCode,
-                              isHolderNameVisible: true,
-                              isCardNumberVisible: true,
-                              isExpiryDateVisible: true,
-                              cardHolderName: cardHolderName,
-                              expiryDate: expiryDate,
-                              inputConfiguration: const InputConfiguration(
-                                cardNumberDecoration: InputDecoration(
-                                  labelText: 'Картын дугаар',
-                                  hintText: 'XXXX XXXX XXXX XXXX',
-                                ),
-                                expiryDateDecoration: InputDecoration(
-                                  labelText: 'Дуусах хугацаа',
-                                  hintText: 'XX/XX',
-                                ),
-                                cvvCodeDecoration: InputDecoration(
-                                  labelText: 'CVV',
-                                  hintText: 'XXX',
-                                ),
-                                cardHolderDecoration: InputDecoration(
-                                  labelText: 'Карт дээрх нэр',
-                                ),
-                              ),
-                              onCreditCardModelChange: onCreditCardModelChange,
-                            ),
-                            const SizedBox(height: 20),
-                            Padding(
-                              padding:
-                                  const EdgeInsets.symmetric(horizontal: 16),
-                              child: Row(
-                                mainAxisAlignment: MainAxisAlignment.center,
-                                children: <Widget>[
-                                  const Text('Glassmorphism'),
-                                  const Spacer(),
-                                  Switch(
-                                    value: useGlassMorphism,
-                                    inactiveTrackColor: Colors.grey,
-                                    activeColor: Colors.white,
-                                    activeTrackColor: AppColors.colorE5D1B2,
-                                    onChanged: (bool value) => setState(() {
-                                      useGlassMorphism = value;
-                                    }),
-                                  ),
-                                ],
-                              ),
-                            ),
-                            Padding(
-                              padding:
-                                  const EdgeInsets.symmetric(horizontal: 16),
-                              child: Row(
-                                mainAxisAlignment: MainAxisAlignment.center,
-                                children: <Widget>[
-                                  const Text('Card Image'),
-                                  const Spacer(),
-                                  Switch(
-                                    value: useBackgroundImage,
-                                    inactiveTrackColor: Colors.grey,
-                                    activeColor: Colors.white,
-                                    activeTrackColor: AppColors.colorE5D1B2,
-                                    onChanged: (bool value) => setState(() {
-                                      useBackgroundImage = value;
-                                    }),
-                                  ),
-                                ],
-                              ),
-                            ),
-                            Padding(
-                              padding:
-                                  const EdgeInsets.symmetric(horizontal: 16),
-                              child: Row(
-                                mainAxisAlignment: MainAxisAlignment.center,
-                                children: <Widget>[
-                                  const Text('Floating Card'),
-                                  const Spacer(),
-                                  Switch(
-                                    value: useFloatingAnimation,
-                                    inactiveTrackColor: Colors.grey,
-                                    activeColor: Colors.white,
-                                    activeTrackColor: AppColors.colorE5D1B2,
-                                    onChanged: (bool value) => setState(() {
-                                      useFloatingAnimation = value;
-                                    }),
-                                  ),
-                                ],
-                              ),
-                            ),
-                            const SizedBox(height: 20),
-                            GestureDetector(
-                              onTap: _onValidate,
-                              child: Container(
-                                margin: const EdgeInsets.symmetric(
-                                  horizontal: 16,
-                                  vertical: 8,
-                                ),
-                                decoration: const BoxDecoration(
-                                  gradient: LinearGradient(
-                                    colors: <Color>[
-                                      AppColors.colorB58D67,
-                                      AppColors.colorB58D67,
-                                      AppColors.colorE5D1B2,
-                                      AppColors.colorF9EED2,
-                                      AppColors.colorEFEFED,
-                                      AppColors.colorF9EED2,
-                                      AppColors.colorB58D67,
-                                    ],
-                                    begin: Alignment(-1, -4),
-                                    end: Alignment(1, 4),
-                                  ),
-                                  borderRadius: BorderRadius.all(
-                                    Radius.circular(8),
-                                  ),
-                                ),
-                                padding:
-                                    const EdgeInsets.symmetric(vertical: 15),
-                                alignment: Alignment.center,
-                                child: const Text(
-                                  'Хадгалах',
-                                  style: TextStyle(
-                                    color: Colors.black,
-                                    fontFamily: 'halter',
-                                    fontSize: 14,
-                                    package: 'flutter_credit_card',
-                                  ),
-                                ),
+                    const Image(image: AssetImage('images/jingle.png'))
+                  ],
+                ),
+              ],
+            ),
+            Builder(
+              builder: (BuildContext context) {
+                return Container(
+                  padding: const EdgeInsets.only(top: 100),
+                  child: SafeArea(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.end,
+                      children: <Widget>[
+                        CreditCardWidget(
+                          enableFloatingCard: useFloatingAnimation,
+                          glassmorphismConfig: _getGlassmorphismConfig(),
+                          cardNumber: cardNumber,
+                          expiryDate: expiryDate,
+                          cardHolderName: cardHolderName,
+                          cvvCode: cvvCode,
+                          bankName: 'Khan Bank',
+                          frontCardBorder: useGlassMorphism
+                              ? null
+                              : Border.all(color: Colors.grey),
+                          backCardBorder: useGlassMorphism
+                              ? null
+                              : Border.all(color: Colors.grey),
+                          showBackView: isCvvFocused,
+                          obscureCardNumber: true,
+                          obscureCardCvv: true,
+                          isHolderNameVisible: true,
+                          cardBgColor: isLightTheme
+                              ? const Color(0xFF408782)
+                              : const Color(0xFF408782),
+                          backgroundImage:
+                              useBackgroundImage ? 'images/card_bg.png' : null,
+                          isSwipeGestureEnabled: true,
+                          onCreditCardWidgetChange:
+                              (CreditCardBrand creditCardBrand) {
+                            // Properly handle the detected card brand
+                          },
+                          customCardTypeIcons: <CustomCardTypeIcon>[
+                            CustomCardTypeIcon(
+                              cardType: CardType.mastercard,
+                              cardImage: Image.asset(
+                                'images/mastercard.png',
+                                height: 48,
+                                width: 48,
                               ),
                             ),
                           ],
                         ),
-                      ),
+                        Expanded(
+                          child: SingleChildScrollView(
+                            child: Column(
+                              children: <Widget>[
+                                CreditCardForm(
+                                  formKey: formKey,
+                                  obscureCvv: true,
+                                  obscureNumber: true,
+                                  cardNumber: cardNumber,
+                                  cvvCode: cvvCode,
+                                  isHolderNameVisible: true,
+                                  isCardNumberVisible: true,
+                                  isExpiryDateVisible: true,
+                                  cardHolderName: cardHolderName,
+                                  expiryDate: expiryDate,
+                                  inputConfiguration: InputConfiguration(
+                                    cardNumberDecoration: _buildInputDecoration(
+                                      label: 'Картын дугаар',
+                                      hint: 'XXXX XXXX XXXX XXXX',
+                                    ),
+                                    expiryDateDecoration: _buildInputDecoration(
+                                      label: 'Дуусах хугацаа',
+                                      hint: 'MM/YY',
+                                    ),
+                                    cvvCodeDecoration: _buildInputDecoration(
+                                      label: 'CVV',
+                                      hint: 'XXX',
+                                    ),
+                                    cardHolderDecoration: _buildInputDecoration(
+                                      label: 'Карт дээрх нэр',
+                                    ),
+                                  ),
+                                  onCreditCardModelChange:
+                                      onCreditCardModelChange,
+                                ),
+                                const SizedBox(height: 20),
+                                Padding(
+                                  padding: const EdgeInsets.symmetric(
+                                      horizontal: 16.0),
+                                  child: TextFormField(
+                                    controller: _chargeAmountController,
+                                    keyboardType: TextInputType.number,
+                                    decoration: _buildInputDecoration(
+                                      label: 'Цэнэглэх дүн',
+                                      hint: '0.00',
+                                    ),
+                                    validator: (value) {
+                                      if (value == null || value.isEmpty) {
+                                        return 'Дүн оруулна уу';
+                                      }
+                                      if (double.tryParse(value) == null) {
+                                        return 'Буруу дүн';
+                                      }
+                                      return null;
+                                    },
+                                  ),
+                                ),
+                                const SizedBox(height: 20),
+                                GestureDetector(
+                                  onTap: () => _onValidate(userProvider.uid),
+                                  child: Container(
+                                    margin: const EdgeInsets.symmetric(
+                                      horizontal: 16,
+                                      vertical: 8,
+                                    ),
+                                    decoration: BoxDecoration(
+                                      color: const Color(0xFFFFFFFF),
+                                      border: Border.all(
+                                        color: const Color(0xFF408782),
+                                        width: 2.0,
+                                      ),
+                                      borderRadius: const BorderRadius.all(
+                                        Radius.circular(100),
+                                      ),
+                                    ),
+                                    padding: const EdgeInsets.symmetric(
+                                      vertical: 15,
+                                    ),
+                                    alignment: Alignment.center,
+                                    child: const Text(
+                                      'Цэнэглэх',
+                                      style: TextStyle(
+                                        color: Color(0xff408782),
+                                        fontFamily: 'halter',
+                                        fontSize: 14,
+                                        package: 'flutter_credit_card',
+                                      ),
+                                    ),
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                        ),
+                      ],
                     ),
-                  ],
-                ),
-              ),
-            );
-          },
+                  ),
+                );
+              },
+            ),
+          ],
         ),
       ),
     );
   }
 
-  void _onValidate() {
+  void _onValidate(String userID) async {
     if (formKey.currentState?.validate() ?? false) {
-      print('valid!');
+      double chargeAmount = double.parse(_chargeAmountController.text);
+
+      await FirebaseFirestore.instance.collection('transactionHistory').add({
+        'isIncome': true,
+        'uid': userID,
+        'amount': chargeAmount,
+        'transactionDate': DateTime.now(),
+      });
+      await FirebaseFirestore.instance.collection('users').doc(userID).update({
+        'balance': FieldValue.increment(chargeAmount),
+      });
+
+      _showSuccessDialog(context);
+      Future.delayed(const Duration(seconds: 2), () {
+        Navigator.pushReplacement(
+          context,
+          MaterialPageRoute(builder: (context) => Home()),
+        );
+      });
     } else {
-      print('invalid!');
     }
   }
 
+  void _showSuccessDialog(BuildContext context) {
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: const Text('Амжилттай'),
+          content: const Text('Таны цэнэглэлт амжилттай боллоо.'),
+          actions: <Widget>[
+            TextButton(
+              onPressed: () {
+                Navigator.of(context).pop(); // Close the dialog
+              },
+              child: const Text('OK'),
+            ),
+          ],
+        );
+      },
+    );
+  }
+
   Glassmorphism? _getGlassmorphismConfig() {
-    if (!useGlassMorphism) {
-      return null;
-    }
+    if (!useGlassMorphism) return null;
 
     final LinearGradient gradient = LinearGradient(
       begin: Alignment.topLeft,
@@ -320,18 +328,29 @@ class PaymentState extends State<Payment> {
       stops: const <double>[0.3, 0],
     );
 
-    return isLightTheme
-        ? Glassmorphism(blurX: 8.0, blurY: 16.0, gradient: gradient)
-        : Glassmorphism.defaultConfig();
+    return Glassmorphism(blurX: 8.0, blurY: 16.0, gradient: gradient);
   }
 
-  void onCreditCardModelChange(CreditCardModel creditCardModel) {
+  InputDecoration _buildInputDecoration({required String label, String? hint}) {
+    return InputDecoration(
+      focusedBorder: OutlineInputBorder(
+        borderSide: BorderSide(
+          color: const Color(0xFF408782),
+          width: 2.0,
+        ),
+      ),
+      labelText: label,
+      hintText: hint,
+    );
+  }
+
+  void onCreditCardModelChange(CreditCardModel? creditCardModel) {
     setState(() {
-      cardNumber = creditCardModel.cardNumber;
-      expiryDate = creditCardModel.expiryDate;
-      cardHolderName = creditCardModel.cardHolderName;
-      cvvCode = creditCardModel.cvvCode;
-      isCvvFocused = creditCardModel.isCvvFocused;
+      cardNumber = creditCardModel?.cardNumber ?? '';
+      expiryDate = creditCardModel?.expiryDate ?? '';
+      cardHolderName = creditCardModel?.cardHolderName ?? '';
+      cvvCode = creditCardModel?.cvvCode ?? '';
+      isCvvFocused = creditCardModel?.isCvvFocused ?? false;
     });
   }
 }

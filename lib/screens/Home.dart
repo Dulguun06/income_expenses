@@ -1,6 +1,7 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import 'package:income_expenses/screens/TransactionHistoryWidget.dart';
 import 'package:income_expenses/screens/user_provider.dart';
 import 'package:provider/provider.dart';
 
@@ -37,6 +38,7 @@ class _HomeState extends State<Home> {
           final userProvider =
               Provider.of<UserProvider>(context, listen: false);
           userProvider.setUserName(doc['userName'] ?? "Хэрэглэгч");
+          userProvider.setUserID(doc['uid'] ?? "");
           userProvider.setBalance((doc['balance'] ?? 0).toDouble());
         } else {
           print("No user data found for UID: ${currentUser.uid}");
@@ -60,7 +62,6 @@ class _HomeState extends State<Home> {
       resizeToAvoidBottomInset: false,
       body: Stack(
         children: [
-          // Background images
           Positioned(
             width: MediaQuery.of(context).size.width,
             top: 0,
@@ -150,22 +151,7 @@ class _HomeState extends State<Home> {
                     ),
                   ),
                   const SizedBox(height: 20),
-                  const Padding(
-                    padding: EdgeInsets.symmetric(horizontal: 16.0),
-                    child: Row(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        Text(
-                          'Гүйлгээний түүх байхгүй',
-                          style: TextStyle(
-                            fontSize: 16,
-                            color: Colors.white,
-                            fontWeight: FontWeight.w400,
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
+                  TransactionHistoryWidget(userID: userProvider.uid),
                 ],
               ),
             ),
