@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "71675003492",
+    "project_id": "dudufinance-5f300",
+    "storage_bucket": "dudufinance-5f300.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:71675003492:android:83760072dedb820dca1571",
+        "android_client_info": {
+          "package_name": "com.example.income_expenses"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyArRUZ3OZ8Sf5niGktdxJ7CMwOBrRgNXu8"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

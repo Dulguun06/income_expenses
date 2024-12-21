@@ -1,0 +1,42 @@
+plugins {
+    id "com.android.application"
+    id "kotlin-android"
+    id "dev.flutter.flutter-gradle-plugin"
+    id "com.google.gms.google-services"
+}
+dependencies {
+    implementation platform('com.google.firebase:firebase-bom:33.7.0')
+}
+
+android {
+    namespace = "com.example.income_expenses"
+    compileSdk = 34 // Ensure this matches your desired compile SDK version (or use flutter.compileSdkVersion)
+    ndkVersion = "21.3.6528147" // Check if this matches your project's NDK version, or use flutter.ndkVersion
+
+    compileOptions {
+        sourceCompatibility = JavaVersion.VERSION_1_8
+        targetCompatibility = JavaVersion.VERSION_1_8
+    }
+
+    kotlinOptions {
+        jvmTarget = JavaVersion.VERSION_1_8
+    }
+
+    defaultConfig {
+        applicationId = "com.example.income_expenses"
+        minSdk = 23 // Adjust according to your needs or use flutter.minSdkVersion
+        targetSdk = 34 // Adjust according to your needs or use flutter.targetSdkVersion
+        versionCode = 1 // You should update this version code
+        versionName = "1.0.0" // Update to your app's version
+    }
+
+    buildTypes {
+        release {
+            signingConfig = signingConfigs.debug // Update with your actual signing config for release
+        }
+    }
+}
+
+flutter {
+    source = "../.." // Make sure this points correctly to the root of your Flutter project
+}
