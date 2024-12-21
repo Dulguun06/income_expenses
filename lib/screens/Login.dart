@@ -1,7 +1,6 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:income_expenses/screens/BottomNavBarScreen.dart';
-import 'package:income_expenses/screens/Home.dart';
 import 'package:income_expenses/screens/Register.dart';
 
 class Login extends StatefulWidget {

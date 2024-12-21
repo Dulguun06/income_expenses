@@ -1,6 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:income_expenses/screens/user_provider.dart';
 import 'package:provider/provider.dart';
+
+import 'Payment.dart';
+
 class Wallet extends StatefulWidget {
   const Wallet({super.key});
 
@@ -8,8 +11,7 @@ class Wallet extends StatefulWidget {
   State<Wallet> createState() => _WalletState();
 }
 
-class _WalletState extends State<Wallet>
-    with TickerProviderStateMixin {
+class _WalletState extends State<Wallet> with TickerProviderStateMixin {
   late TabController tabController = TabController(length: 2, vsync: this);
   List<bool> isSelected = List.generate(2, (index) => false);
 
@@ -63,7 +65,7 @@ class _WalletState extends State<Wallet>
                   width: MediaQuery.of(context).size.width,
                   child: Column(
                     children: [
-                       Stack(
+                      Stack(
                         children: [
                           Column(
                             children: [
@@ -110,7 +112,13 @@ class _WalletState extends State<Wallet>
                                   Icons.add,
                                   color: Color(0xff408782),
                                 ),
-                                onPressed: () {},
+                                onPressed: () {
+                                  Navigator.push(
+                                    context,
+                                    MaterialPageRoute(
+                                        builder: (context) => const Payment()),
+                                  );
+                                },
                               ),
                             ),
                             Container(
@@ -150,28 +158,27 @@ class _WalletState extends State<Wallet>
                             borderRadius: BorderRadius.circular(10)),
                         elevation: 5,
                         child: Container(
-                          
                           decoration: BoxDecoration(
                               borderRadius: BorderRadius.circular(10)),
                           child: Container(
                             height: 55,
-                            color:Color(0xFFF4F6F6),
+                            color: Color(0xFFF4F6F6),
                             child: TabBar(
-                            controller: tabController,
-                            isScrollable: true,
-                            tabs: [
-                              Tab(
-                                text: 'Гүйлгээнүүд',
-                              ),
-                              Tab(
-                                text: 'Хүлээгдэж буй гүйлгээнүүд',
-                              ),
-                            ],
-                            indicator: BoxDecoration(
-                                borderRadius: BorderRadius.circular(12),
-                                color: Color(0xFFFFFFFF)),
-                                labelColor: Color(0xFF666666),
-                          ),
+                              controller: tabController,
+                              isScrollable: true,
+                              tabs: [
+                                Tab(
+                                  text: 'Гүйлгээнүүд',
+                                ),
+                                Tab(
+                                  text: 'Хүлээгдэж буй гүйлгээнүүд',
+                                ),
+                              ],
+                              indicator: BoxDecoration(
+                                  borderRadius: BorderRadius.circular(12),
+                                  color: Color(0xFFFFFFFF)),
+                              labelColor: Color(0xFF666666),
+                            ),
                           ),
                         ),
                       ),

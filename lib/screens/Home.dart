@@ -10,6 +10,7 @@ class Home extends StatefulWidget {
   @override
   State<Home> createState() => _HomeState();
 }
+
 class _HomeState extends State<Home> {
   String userName = "Хэрэглэгч";
   double balance = 0.0;
@@ -33,7 +34,8 @@ class _HomeState extends State<Home> {
             FirebaseFirestore.instance.collection('users').doc(currentUser.uid);
         DocumentSnapshot doc = await userRef.get();
         if (doc.exists) {
-          final userProvider = Provider.of<UserProvider>(context, listen: false);
+          final userProvider =
+              Provider.of<UserProvider>(context, listen: false);
           userProvider.setUserName(doc['userName'] ?? "Хэрэглэгч");
           userProvider.setBalance((doc['balance'] ?? 0).toDouble());
         } else {
@@ -60,13 +62,15 @@ class _HomeState extends State<Home> {
         children: [
           // Background images
           Positioned(
+            width: MediaQuery.of(context).size.width,
             top: 0,
             child: Image.asset(
               'images/hangingBackground.png',
-              
+              fit: BoxFit.cover,
             ),
           ),
-          Positioned.fill(
+          Positioned(
+            top: 0,
             child: Image.asset(
               'images/Group 6.png',
               fit: BoxFit.cover,
@@ -113,7 +117,6 @@ class _HomeState extends State<Home> {
                   ),
                   const SizedBox(height: 30),
                   Card(
-                    
                     color: const Color(0xff2F7E79),
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(20),
