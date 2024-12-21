@@ -1,5 +1,6 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import 'package:income_expenses/screens/BottomNavBarScreen.dart';
 import 'package:income_expenses/screens/Home.dart';
 import 'package:income_expenses/screens/Register.dart';
 
@@ -34,7 +35,7 @@ class _LoginState extends State<Login> {
       );
       Navigator.pushReplacement(
         context,
-        MaterialPageRoute(builder: (context) => Home()),
+        MaterialPageRoute(builder: (context) => BottomNavBarScreen()),
       );
     } catch (e) {
       _showError("Нэвтрэх үед алдаа гарлаа. Дахин оролдоно уу!");

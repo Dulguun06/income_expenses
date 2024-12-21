@@ -1,3 +1,4 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 
@@ -33,9 +34,14 @@ class _RegisterState extends State<Register> {
 
         // You can add further actions like navigating to the home screen
         print('User registered: ${userCredential.user?.email}');
+        addUser(_fullNameController.text.trim());
         ScaffoldMessenger.of(context).showSnackBar(SnackBar(
           content: Text('Registration Successful!'),
         ));
+        Navigator.push(
+          context,
+          MaterialPageRoute(builder: (context) => const Register()),
+        );
       } on FirebaseAuthException catch (e) {
         if (e.code == 'weak-password') {
           ScaffoldMessenger.of(context).showSnackBar(SnackBar(
@@ -61,6 +67,18 @@ class _RegisterState extends State<Register> {
         content: Text('Passwords do not match!'),
       ));
     }
+  }
+
+  Future<void> addUser(String fullName) async {
+    CollectionReference users = FirebaseFirestore.instance.collection('users');
+    String? userId = _auth.currentUser?.uid;
+    return users
+        .doc(userId)
+        .set({'userName': fullName, 'balance': 0}).then((value) {
+      print("User details added to Firestore");
+    }).catchError((error) {
+      print("Failed to add user: $error");
+    });
   }
 
   @override

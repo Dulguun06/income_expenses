@@ -1,6 +1,8 @@
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 import 'package:income_expenses/screens/SplashScreen.dart';
+import 'package:income_expenses/screens/user_provider.dart';
+import 'package:provider/provider.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -13,9 +15,13 @@ class MyApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(
-      theme: ThemeData( primarySwatch: Colors.blue,),
-      home: SplashScreen(),
-    );
+    return ChangeNotifierProvider(
+        create: (context) => UserProvider(),
+        child: MaterialApp(
+          theme: ThemeData(
+            primarySwatch: Colors.blue,
+          ),
+          home: SplashScreen(),
+        ));
   }
 }
