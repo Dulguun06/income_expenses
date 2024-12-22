@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:income_expenses/screens/Payment.dart';
+import 'package:income_expenses/screens/PendingTransactionsList.dart';
 import 'package:income_expenses/screens/TransactionHistoryWidget.dart';
 import 'package:income_expenses/screens/user_provider.dart';
 import 'package:provider/provider.dart';
@@ -131,7 +132,7 @@ class _WalletState extends State<Wallet> with TickerProviderStateMixin {
                           // Transaction History Tab
                           TransactionHistoryWidget(userID: userProvider.uid),
                           // Pending Transactions Tab
-                          PendingTransactionsList(),
+                          PendingTransactionsList(userID: userProvider.uid),
                         ],
                       ),
                     ),
@@ -145,7 +146,6 @@ class _WalletState extends State<Wallet> with TickerProviderStateMixin {
     );
   }
 
-  // Helper function to build icon buttons
   Widget buildIconButton(IconData icon, VoidCallback onPressed) {
     return Container(
       decoration: BoxDecoration(
@@ -163,40 +163,3 @@ class _WalletState extends State<Wallet> with TickerProviderStateMixin {
   }
 }
 
-// Widget for Pending Transactions Tab
-class PendingTransactionsList extends StatelessWidget {
-  const PendingTransactionsList({super.key});
-
-  @override
-  Widget build(BuildContext context) {
-    return ListView.builder(
-      physics: BouncingScrollPhysics(),
-      shrinkWrap: true,
-      itemCount: 4, // Example for pending transactions
-      itemBuilder: (context, index) {
-        return Padding(
-          padding: const EdgeInsets.all(8.0),
-          child: ListTile(
-            title: Row(
-              children: [
-                Image.asset('images/ytube.png'),
-                SizedBox(width: 9),
-                Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text('Youtube'),
-                    Text('Feb 28, 2022'),
-                  ],
-                ),
-              ],
-            ),
-            trailing: ElevatedButton(
-              onPressed: () {},
-              child: Text('Төлөх'),
-            ),
-          ),
-        );
-      },
-    );
-  }
-}

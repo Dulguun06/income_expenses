@@ -2,6 +2,7 @@ import 'package:flutter_credit_card/flutter_credit_card.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:income_expenses/screens/BottomNavBarScreen.dart';
 import 'package:income_expenses/screens/Home.dart';
 import 'package:income_expenses/screens/user_provider.dart';
 import 'package:provider/provider.dart'; // Add Firestore dependency
@@ -290,7 +291,7 @@ class PaymentState extends State<Payment> {
       Future.delayed(const Duration(seconds: 2), () {
         Navigator.pushReplacement(
           context,
-          MaterialPageRoute(builder: (context) => Home()),
+          MaterialPageRoute(builder: (context) => BottomNavBarScreen()),
         );
       });
     } else {

@@ -1,3 +1,5 @@
+import 'dart:ffi';
+
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
@@ -40,6 +42,7 @@ class _HomeState extends State<Home> {
           userProvider.setUserName(doc['userName'] ?? "Хэрэглэгч");
           userProvider.setUserID(doc['uid'] ?? "");
           userProvider.setBalance((doc['balance'] ?? 0).toDouble());
+          fetchTransaction(currentUser.uid);
         } else {
           print("No user data found for UID: ${currentUser.uid}");
         }
@@ -52,6 +55,38 @@ class _HomeState extends State<Home> {
       setState(() {
         isLoading = false;
       });
+    }
+  }
+
+  Future<void> fetchTransaction(String userID) async {
+    print("user" + userID);
+    final userProvider = Provider.of<UserProvider>(context, listen: false);
+    try {
+      QuerySnapshot transactionSnapshot = await FirebaseFirestore.instance
+          .collection('transactionHistory')
+          .where("uid", isEqualTo: userID)
+          .get();
+
+      double income = 0.0;
+      double expense = 0.0;
+
+      for (QueryDocumentSnapshot doc in transactionSnapshot.docs) {
+        Map<String, dynamic> data = doc.data() as Map<String, dynamic>;
+        double amount = (data['amount'] ?? 0.0).toDouble();
+        bool isIncome = data['isIncome'] ?? false;
+
+        if (isIncome) {
+          income += amount;
+        } else {
+          expense += amount;
+        }
+      }
+
+      // Update the provider
+      userProvider.setIncome(income);
+      userProvider.setExpense(expense);
+    } catch (e) {
+      print("Error fetching transactions: $e");
     }
   }
 
@@ -117,36 +152,81 @@ class _HomeState extends State<Home> {
                     ),
                   ),
                   const SizedBox(height: 30),
-                  Card(
-                    color: const Color(0xff2F7E79),
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(20),
-                    ),
-                    elevation: 10,
-                    child: Container(
-                      width: MediaQuery.of(context).size.width * 0.8,
-                      padding: const EdgeInsets.all(16.0),
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          const Text(
-                            'Нийт үлдэгдэл',
-                            style: TextStyle(
-                              fontSize: 16,
-                              color: Colors.white,
-                              fontWeight: FontWeight.w600,
+                  Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 16.0),
+                    child: Card(
+                      color: const Color(0xff2F7E79),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(20),
+                      ),
+                      elevation: 10,
+                      child: Container(
+                        width: MediaQuery.of(context).size.width * 0.8,
+                        padding: const EdgeInsets.all(16.0),
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            const Text(
+                              'Нийт үлдэгдэл',
+                              style: TextStyle(
+                                fontSize: 16,
+                                color: Colors.white,
+                                fontWeight: FontWeight.w600,
+                              ),
                             ),
-                          ),
-                          const SizedBox(height: 10),
-                          Text(
-                            '\$${userProvider.balance.toStringAsFixed(2)}',
-                            style: const TextStyle(
-                              fontWeight: FontWeight.bold,
-                              fontSize: 30,
-                              color: Colors.white,
+                            const SizedBox(height: 10),
+                            Text(
+                              '\$${userProvider.balance.toStringAsFixed(2)}',
+                              style: const TextStyle(
+                                fontWeight: FontWeight.bold,
+                                fontSize: 30,
+                                color: Colors.white,
+                              ),
                             ),
-                          ),
-                        ],
+                            Row(
+                                mainAxisAlignment:
+                                    MainAxisAlignment.spaceBetween,
+                                children: [
+                                  Column(
+                                    children: [
+                                      Row(
+                                        children: [
+                                          Icon(Icons.arrow_upward,
+                                              color: Colors.white),
+                                          Text("Орлого",
+                                              style: TextStyle(
+                                                  color: Colors.white)),
+                                        ],
+                                      ),
+                                      Text(
+                                          "\$${userProvider.income.toStringAsFixed(2)}",
+                                          style: TextStyle(
+                                              color: Colors.white,
+                                              fontWeight: FontWeight.bold))
+                                    ],
+                                  ),
+                                  Column(
+                                    children: [
+                                      Row(
+                                        children: [
+                                          Icon(Icons.arrow_downward,
+                                              color: Colors.white),
+                                          Text("Зарлага",
+                                              style: TextStyle(
+                                                  color: Colors.white)),
+                                        ],
+                                      ),
+                                      Text(
+                                        "\$${userProvider.expense.toStringAsFixed(2)}",
+                                        style: TextStyle(
+                                            color: Colors.white,
+                                            fontWeight: FontWeight.bold),
+                                      )
+                                    ],
+                                  ),
+                                ]),
+                          ],
+                        ),
                       ),
                     ),
                   ),
