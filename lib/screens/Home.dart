@@ -1,4 +1,3 @@
-import 'dart:ffi';
 
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
@@ -59,7 +58,6 @@ class _HomeState extends State<Home> {
   }
 
   Future<void> fetchTransaction(String userID) async {
-    print("user" + userID);
     final userProvider = Provider.of<UserProvider>(context, listen: false);
     try {
       QuerySnapshot transactionSnapshot = await FirebaseFirestore.instance

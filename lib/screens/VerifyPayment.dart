@@ -1,18 +1,19 @@
 import 'package:flutter/material.dart';
-import 'package:income_expenses/screens/BillPayment.dart';
+import 'package:qr_flutter/qr_flutter.dart';
 
-class BillDetails extends StatefulWidget {
+class VerifyPayment extends StatefulWidget {
   final Map<String, dynamic> transaction;
 
-  const BillDetails({super.key, required this.transaction});
+  const VerifyPayment({super.key, required this.transaction});
 
   @override
-  State<BillDetails> createState() => _BillDetailsState();
+  State<VerifyPayment> createState() => _VerifyPaymentState();
 }
 
 int? _selectedValue = null;
+bool isExpanded = false;
 
-class _BillDetailsState extends State<BillDetails> {
+class _VerifyPaymentState extends State<VerifyPayment> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -70,20 +71,15 @@ class _BillDetailsState extends State<BillDetails> {
                 child: Column(
                   children: [
                     SizedBox(height: 20),
-                    // Display the name of the transaction (e.g., "Youtube")
-                    Text(
-                      '${widget.transaction['name']}',
-                      style: TextStyle(
-                          color: Colors.black,
-                          fontWeight: FontWeight.bold,
-                          fontSize: 20),
-                    ),
-                    SizedBox(height: 4),
-                    // Display the balance from the transaction or other details
-                    Text(
-                      'Date: ${widget.transaction['date'] ?? 'N/A'}',
-                      style: TextStyle(fontSize: 16, color: Colors.black),
-                    ),
+                    Padding(
+                        padding: const EdgeInsets.symmetric(horizontal: 50.0),
+                        child: Text(
+                          "Амжилттай Төлөгдлөө",
+                          style:
+                              TextStyle(fontSize: 20, color: Color(0xff3E7C78)),
+                          textAlign: TextAlign.center,
+                        )),
+                    Text("${widget.transaction['name']}"),
                     SizedBox(height: 20),
                     // Display other transaction details like date and note
                     Padding(
@@ -91,6 +87,81 @@ class _BillDetailsState extends State<BillDetails> {
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
+                          GestureDetector(
+                            onTap: () {
+                              setState(() {
+                                isExpanded =
+                                    !isExpanded; // Toggle the expanded state
+                              });
+                            },
+                            child: Row(
+                              children: [
+                                Text(
+                                  'Гүйлгээний Дэлгэрэнгүй', // This is the "Expand" button
+                                  style: TextStyle(
+                                    fontSize: 18,
+                                    fontWeight: FontWeight.bold,
+                                    color: Colors.black,
+                                  ),
+                                ),
+                                Icon(
+                                  isExpanded
+                                      ? Icons.arrow_drop_up
+                                      : Icons.arrow_drop_down,
+                                  color: Colors.black,
+                                ),
+                              ],
+                            ),
+                          ),
+                          AnimatedContainer(
+                            duration: Duration(milliseconds: 300),
+                            height: isExpanded
+                                ? 80.0
+                                : 0.0, // Adjust the height based on the expansion state
+                            child: isExpanded
+                                ? Padding(
+                                    padding: const EdgeInsets.only(top: 8.0),
+                                    child: Column(
+                                      children: [
+                                        Row(
+                                          mainAxisAlignment:
+                                              MainAxisAlignment.spaceBetween,
+                                          children: [
+                                            Text("Төлөв"),
+                                            Text("Хийгдсэн",
+                                                style: TextStyle(
+                                                    fontWeight: FontWeight.w500,
+                                                    color: Color(0xff3E7C78)))
+                                          ],
+                                        ),
+                                        Row(
+                                          mainAxisAlignment:
+                                              MainAxisAlignment.spaceBetween,
+                                          children: [
+                                            Text("Огноо"),
+                                            Text(
+                                                "${widget.transaction['date']}",
+                                                style: TextStyle(
+                                                    fontWeight:
+                                                        FontWeight.w500))
+                                          ],
+                                        ),
+                                        Row(
+                                          mainAxisAlignment:
+                                              MainAxisAlignment.spaceBetween,
+                                          children: [
+                                            Text("Гүйлгээний Дугаар"),
+                                            Text(
+                                                "${widget.transaction['docID']}",
+                                                style: TextStyle(
+                                                    fontWeight:
+                                                        FontWeight.w500))
+                                          ],
+                                        ),
+                                      ],
+                                    ))
+                                : Container(), // Empty container when collapsed
+                          ),
                           Row(
                               mainAxisAlignment: MainAxisAlignment.spaceBetween,
                               children: [
@@ -144,82 +215,34 @@ class _BillDetailsState extends State<BillDetails> {
                       ),
                     ),
                     SizedBox(height: 20),
-                    Text("Төлбөрийн хэрэгсэлээ сонго",
-                        textAlign: TextAlign.left,
-                        style: TextStyle(
-                            fontSize: 16,
-                            color: Colors.black,
-                            fontWeight: FontWeight.bold)),
-                    SizedBox(height: 20),
-                    Padding(
-                      padding: const EdgeInsets.symmetric(horizontal: 16.0),
-                      child: Column(children: [
-                        Container(
-                          decoration: BoxDecoration(
-                            color: _selectedValue == 1
-                                ? Color(0xffECF9F8)
-                                : Colors.transparent,
-                            borderRadius: BorderRadius.circular(15),
-                          ),
-                          child: ListTile(
-                            leading: Radio<int>(
-                              value: 1,
-                              groupValue: _selectedValue,
-                              onChanged: (int? value) {
-                                setState(() {
-                                  _selectedValue = value;
-                                });
-                              },
-                              activeColor: Color(0xff03E7C78),
-                            ),
-                            title: Text(
-                              'Дебит карт',
-                              style: TextStyle(color: Color(0xff03E7C78)),
-                            ),
-                          ),
-                        ),
-                        Container(
-                          decoration: BoxDecoration(
-                            color: _selectedValue == 2
-                                ? Color(0xffECF9F8)
-                                : Colors.transparent,
-                            borderRadius: BorderRadius.circular(15),
-                          ),
-                          child: ListTile(
-                            leading: Radio<int>(
-                              value: 2,
-                              groupValue: _selectedValue,
-                              onChanged: (int? value) {
-                                setState(() {
-                                  _selectedValue = value;
-                                });
-                              },
-                              activeColor: Color(0xff03E7C78),
-                            ),
-                            title: Text(
-                              'Paypal',
-                              style: TextStyle(color: Color(0xff03E7C78)),
-                            ),
-                          ),
-                        ),
-                      ]),
-                    ),
+                    QrImageView(
+                        data:
+                            "https://youtu.be/dQw4w9WgXcQ?si=7xNFcsQuXOjIP5bX",
+                        version: QrVersions.auto,
+                        size: 200),
                     SizedBox(height: 20),
                     ElevatedButton(
                       onPressed: () {
-                        Navigator.push(context, MaterialPageRoute(builder: (context) => BillPayment(transaction: widget.transaction)));
+                        Navigator.pop(context);
+                        Navigator.pop(context);
+                        Navigator.pop(context);
                       },
                       style: ElevatedButton.styleFrom(
                         padding:
                             EdgeInsets.symmetric(horizontal: 50, vertical: 15),
                         shape: RoundedRectangleBorder(
                           borderRadius: BorderRadius.circular(30),
+                          side: BorderSide(
+                            color: Color(0xff3E7C78), // Set border color here
+                            width: 2.0, // Set border width
+                          ),
                         ),
-                        backgroundColor: Color(0xFF3E7C78),
+                        backgroundColor: Colors.white,
                       ),
                       child: Text(
-                        'Төлөх',
-                        style: TextStyle(fontSize: 18, color: Colors.white),
+                        'Нүүр',
+                        style:
+                            TextStyle(fontSize: 18, color: Color(0xff3E7C78)),
                       ),
                     ),
                   ],

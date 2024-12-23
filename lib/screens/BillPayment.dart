@@ -1,18 +1,19 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
-import 'package:income_expenses/screens/BillPayment.dart';
+import 'package:income_expenses/screens/VerifyPayment.dart';
 
-class BillDetails extends StatefulWidget {
+class BillPayment extends StatefulWidget {
   final Map<String, dynamic> transaction;
 
-  const BillDetails({super.key, required this.transaction});
+  const BillPayment({super.key, required this.transaction});
 
   @override
-  State<BillDetails> createState() => _BillDetailsState();
+  State<BillPayment> createState() => _BillPaymentState();
 }
 
 int? _selectedValue = null;
 
-class _BillDetailsState extends State<BillDetails> {
+class _BillPaymentState extends State<BillPayment> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -70,19 +71,33 @@ class _BillDetailsState extends State<BillDetails> {
                 child: Column(
                   children: [
                     SizedBox(height: 20),
-                    // Display the name of the transaction (e.g., "Youtube")
-                    Text(
-                      '${widget.transaction['name']}',
-                      style: TextStyle(
-                          color: Colors.black,
-                          fontWeight: FontWeight.bold,
-                          fontSize: 20),
-                    ),
-                    SizedBox(height: 4),
-                    // Display the balance from the transaction or other details
-                    Text(
-                      'Date: ${widget.transaction['date'] ?? 'N/A'}',
-                      style: TextStyle(fontSize: 16, color: Colors.black),
+                    Padding(
+                      padding: const EdgeInsets.symmetric(horizontal: 50.0),
+                      child: RichText(
+                        textAlign: TextAlign.center,
+                        text: TextSpan(
+                          text: "You will pay ",
+                          style: TextStyle(
+                            color: Colors.black,
+                            fontSize: 20,
+                          ),
+                          children: [
+                            TextSpan(
+                              text: "${widget.transaction['name']}",
+                              style: TextStyle(
+                                color: Color(0xff3E7C78),
+                                fontWeight: FontWeight.bold,
+                              ),
+                            ),
+                            TextSpan(
+                              text: " for one month with BCA OneKlik",
+                              style: TextStyle(
+                                color: Colors.black,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
                     ),
                     SizedBox(height: 20),
                     // Display other transaction details like date and note
@@ -144,70 +159,36 @@ class _BillDetailsState extends State<BillDetails> {
                       ),
                     ),
                     SizedBox(height: 20),
-                    Text("Төлбөрийн хэрэгсэлээ сонго",
-                        textAlign: TextAlign.left,
-                        style: TextStyle(
-                            fontSize: 16,
-                            color: Colors.black,
-                            fontWeight: FontWeight.bold)),
-                    SizedBox(height: 20),
-                    Padding(
-                      padding: const EdgeInsets.symmetric(horizontal: 16.0),
-                      child: Column(children: [
-                        Container(
-                          decoration: BoxDecoration(
-                            color: _selectedValue == 1
-                                ? Color(0xffECF9F8)
-                                : Colors.transparent,
-                            borderRadius: BorderRadius.circular(15),
-                          ),
-                          child: ListTile(
-                            leading: Radio<int>(
-                              value: 1,
-                              groupValue: _selectedValue,
-                              onChanged: (int? value) {
-                                setState(() {
-                                  _selectedValue = value;
-                                });
-                              },
-                              activeColor: Color(0xff03E7C78),
-                            ),
-                            title: Text(
-                              'Дебит карт',
-                              style: TextStyle(color: Color(0xff03E7C78)),
-                            ),
-                          ),
-                        ),
-                        Container(
-                          decoration: BoxDecoration(
-                            color: _selectedValue == 2
-                                ? Color(0xffECF9F8)
-                                : Colors.transparent,
-                            borderRadius: BorderRadius.circular(15),
-                          ),
-                          child: ListTile(
-                            leading: Radio<int>(
-                              value: 2,
-                              groupValue: _selectedValue,
-                              onChanged: (int? value) {
-                                setState(() {
-                                  _selectedValue = value;
-                                });
-                              },
-                              activeColor: Color(0xff03E7C78),
-                            ),
-                            title: Text(
-                              'Paypal',
-                              style: TextStyle(color: Color(0xff03E7C78)),
-                            ),
-                          ),
-                        ),
-                      ]),
-                    ),
+
                     SizedBox(height: 20),
                     ElevatedButton(
-                      onPressed: () {
-                        Navigator.push(context, MaterialPageRoute(builder: (context) => BillPayment(transaction: widget.transaction)));
+                      onPressed: () async {
+                        await FirebaseFirestore.instance
+                            .collection(
+                                'payment') // Replace with your actual collection name
+                            .doc(widget.transaction[
+                                'docID']) // Document ID from widget.transaction
+                            .update({'state': false});
+                        await FirebaseFirestore.instance
+                            .collection('transactionHistory')
+                            .add({
+                          'amount': widget.transaction['amount'],
+                          'uid': widget.transaction['uid'],
+                          'transactionDate': DateTime.now(),
+                          'isIncome': false,
+                        });
+                        await FirebaseFirestore.instance
+                            .collection('users')
+                            .doc(widget.transaction['uid'])
+                            .update({
+                          'balance': FieldValue.increment(
+                              widget.transaction['amount']*(-1)),
+                        });
+                        Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                                builder: (context) => VerifyPayment(
+                                    transaction: widget.transaction)));
                       },
                       style: ElevatedButton.styleFrom(
                         padding:
@@ -218,7 +199,7 @@ class _BillDetailsState extends State<BillDetails> {
                         backgroundColor: Color(0xFF3E7C78),
                       ),
                       child: Text(
-                        'Төлөх',
+                        'Баталгаажуулах',
                         style: TextStyle(fontSize: 18, color: Colors.white),
                       ),
                     ),

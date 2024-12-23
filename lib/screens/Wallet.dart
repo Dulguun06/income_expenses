@@ -14,6 +14,22 @@ class Wallet extends StatefulWidget {
 
 class _WalletState extends State<Wallet> with TickerProviderStateMixin {
   late TabController tabController = TabController(length: 2, vsync: this);
+  // bool isLoading = false;
+  // @override
+  // void initState() {
+  //   super.initState();
+  //   fetchData();
+  // }
+
+  // Future<void> fetchData() async {
+  //   setState(() {
+  //     isLoading = true;
+  //   });
+
+  //   setState(() {
+  //     isLoading = false;
+  //   });
+  // }
 
   @override
   Widget build(BuildContext context) {
@@ -110,7 +126,6 @@ class _WalletState extends State<Wallet> with TickerProviderStateMixin {
                         borderRadius: BorderRadius.circular(100),
                       ),
                       child: TabBar(
-                    
                         controller: tabController,
                         isScrollable: true,
                         tabs: [
@@ -162,4 +177,3 @@ class _WalletState extends State<Wallet> with TickerProviderStateMixin {
     );
   }
 }
-

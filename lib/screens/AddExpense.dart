@@ -37,14 +37,18 @@ class _AddExpenseState extends State<AddExpense> {
   Future<void> _submitData(String userID) async {
     if (_formKey.currentState!.validate()) {
       try {
-        await FirebaseFirestore.instance.collection('payment').add({
+        DocumentReference docRef =await FirebaseFirestore.instance.collection('payment').add({
           'name': _nameController.text,
           'amount': double.parse(_amountController.text),
           'date': _dateController.text,
           'note': _noteController.text,
           'uid': userID,
-          'state': true
+          'state': true,
+          'docID':""
         });
+        await docRef.update({
+        'docID': docRef.id,
+      });
         _showSuccessDialog(context);
         Navigator.pushReplacement(
           context,
